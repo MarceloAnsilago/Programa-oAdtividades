@@ -154,12 +154,18 @@ def gerar_programacao(ulsav, supervisao, selected_servidores, selected_atividade
             dia_mes = dia_atual.day
             dias_da_semana.append({"id": dia_semana.lower(), "text": f"{dia_semana} - {dia_mes}"})
 
-    # Definir variáveis semana_do_mes e mes_por_extenso
+    # Definir variáveis semana_do_mes, mes_por_extenso e ano
     semana_do_mes = (primeiro_dia_semana.day - 1) // 7 + 1
     try:
         locale.setlocale(locale.LC_TIME, "pt_BR.utf8")
-    except:
-        locale.setlocale(locale.LC_TIME, "Portuguese_Brazil.1252")
+    except locale.Error:
+        try:
+            locale.setlocale(locale.LC_TIME, "pt_BR.UTF-8")
+        except locale.Error:
+            try:
+                locale.setlocale(locale.LC_TIME, "pt_BR")
+            except locale.Error:
+                locale.setlocale(locale.LC_TIME, "C")
     mes_por_extenso = primeiro_dia_semana.strftime("%B")
     ano = primeiro_dia_semana.year
 
