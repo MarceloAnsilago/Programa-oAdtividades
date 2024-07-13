@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Drag and Drop</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    .draggable {
+      width: 80px;
+      height: 30px;
+      margin: 10px;
+      padding: 5px;
+      border: 1px solid #c0c0c0;
+      display: inline-block;
+      cursor: grab;
+      text-align: center;
+      line-height: 30px;
+      border-radius: 5px;
+      font-size: 12px;
+      box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1);
+      position: relative;
+    }
+    .draggable.person {
+      background-color: #e6f0ff;
+    }
+    .draggable.vehicle {
+      background-color: #d0f0c0;
+    }
+    .day-wrapper {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .day-title {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 150px;
+      text-align: center;
+      font-weight: bold;
+      margin-right: 10px;
+      white-space: nowrap;
+    }
+    .container {
+      width: 100%;
+      height: auto;
+      padding: 10px;
+      border: 2px solid #005f99;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      box-sizing: border-box;
+      border-radius: 10px;
+      background-color: #f8f9fa;
+    }
+    .dropzone {
+      width: 100%;
+      min-height: 100px;
+      margin: 5px 0;
+      padding: 10px;
+      border: 2px solid #1e90ff;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+      position: relative;
+      border-radius: 10px;
+      background-color: #ffffff;
+    }
+    .main-dropzone {
+      flex-grow: 1;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+    }
+    .vehicle-dropzone {
+      width: 100px;
+      min-height: 100px;
+      margin-left: -30px;
+      border: 2px solid #1e90ff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      border-radius: 10px;
+      background-color: #ffffff;
+    }
+    .activity-buttons {
+      display: flex;
+      justify-content: center;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+    .activity-buttons button {
+      margin-right: 5px;
+      margin-bottom: 5px;
+      width: 80px;
+      height: 30px;
+      border-radius: 5px;
+      font-size: 10px;
+      background-color: #1e90ff;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    .activity-buttons button:hover {
+      background-color: #1c86ee;
+    }
+    .vehicles-container {
+      display: flex;
+      justify-content: center;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+    .section-title {
+      font-weight: bold;
+      margin-top: 20px;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+    .close-btn {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      background-color: red;
+      color: white;
+      border: none;
+      padding: 2px;
+      cursor: pointer;
+      z-index: 10;
+      border-radius: 3px;
+      font-size: 10px;
+    }
+    .table-container {
+      margin-top: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      width: 100%;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 10px;
+    }
+    table, th, td {
+      border: 1px solid black;
+    }
+    th, td {
+      padding: 8px;
+      text-align: center;
+    }
+    th {
+      background-color: #4d4d4d;
+      color: white;
+    }
+    .generate-table-button, .delete-table-button, .print-button {
+      width: 120px;
+      height: 40px;
+      border-radius: 5px;
+      font-size: 12px;
+      background-color: #1e90ff;
+      color: white;
+      border: none;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .generate-table-button:hover, .delete-table-button:hover, .print-button:hover {
+      background-color: #1c86ee;
+    }
+    .separator {
+      width: 100%;
+      height: 1px;
+      background-color: #c0c0c0;
+      margin: 20px 0;
+    }
+    .zebra-striping tbody tr:nth-child(odd) {
+      background-color: #f2f2f2;
+    }
+  </style>
+</head>
+<body>
+  <div id="dropzones-container" style="margin-top: 20px;"></div>
+  <div class="table-container">
+    <button class="generate-table-button" onclick="generateTable()">Gerar Tabela</button>
+    <div class="separator"></div>
+    <div id="tables-wrapper"></div>
+  </div>
+
+  <script>
+    const daysOfWeek = [];  // Será substituído pelos dias da semana
+    const activities = [];  // Será substituído por atividades
+    const people = [];  // Será substituído por servidores
+    const vehicles = [];  // Será substituído por veículos
+    const primeiroDia = ''; // Será substituído pela data
+    const ulsav = ''; // Será substituído pela ULSAV
+    const supervisao = ''; // Será substituído pela supervisão
+    const semanaDoMes = ''; // Será substituído pela semana do mês
+    const mesPorExtenso = ''; // Será substituído pelo mês por extenso
+    const ano = ''; // Será substituído pelo ano
+    let draggableCounter = 1;
+
+    function createDropzones() {
+      const container = document.getElementById('dropzones-container');
+      container.innerHTML = ''; // Limpa o container antes de adicionar novos dropzones
+      daysOfWeek.forEach(day => {
+        const dayWrapper = document.createElement('div');
+        dayWrapper.classList.add('day-wrapper');
+        
+        const dayTitle = document.createElement('div');
+        dayTitle.classList.add('day-title');
+        dayTitle.innerText = day.text;  // Mostrar o texto com o dia da semana e o dia do mês
+        
+        const dayContainer = document.createElement('div');
+        dayContainer.classList.add('day-container');
+        
+        const activityTitle = document.createElement('div');
+        activityTitle.classList.add('section-title');
+        activityTitle.innerText = 'Atividades';
+        dayContainer.appendChild(activityTitle);
+
+        const buttonsContainer = document.createElement('div');
+        buttonsContainer.classList.add('activity-buttons');
+        activities.forEach(activity => {
+          const button = document.createElement('button');
+          button.innerText = activity;
+          button.onclick = () => createDropzone(day.id, activity);
+          buttonsContainer.appendChild(button);
+        });
+
+        dayContainer.appendChild(buttonsContainer);
+
+        const vehicleTitle = document.createElement('div');
+        vehicleTitle.classList.add('section-title');
+        vehicleTitle.innerText = 'Veículos';
+        dayContainer.appendChild(vehicleTitle);
+
+        const vehiclesContainer = document.createElement('div');
+        vehiclesContainer.classList.add('vehicles-container');
+        vehiclesContainer.id = `${day.id}-vehicles-container`;
+        vehicles.forEach(vehicle => {
+          const vehicleItem = document.createElement('div');
+          vehicleItem.classList.add('draggable', 'vehicle');
+          vehicleItem.draggable = true;
+          vehicleItem.id = `${day.id}-vehicle-${vehicle.toLowerCase()}`;
+          vehicleItem.innerText = vehicle;
+          vehicleItem.dataset.day = day.id;
+          vehicleItem.dataset.type = 'vehicle';
+          vehicleItem.addEventListener('dragstart', dragStart);
+          vehicleItem.addEventListener('dragend', dragEnd);
+          vehiclesContainer.appendChild(vehicleItem);
+        });
+
+        dayContainer.appendChild(vehiclesContainer);
+
+        const lowerContainer = document.createElement('div');
+        lowerContainer.classList.add('container');
+        lowerContainer.id = `${day.id}-lower-container`;
+
+        const initialDropzone = document.createElement('div');
+        initialDropzone.classList.add('dropzone');
+        initialDropzone.id = `${day.id}-expediente-dropzone`;
+
+        const mainDropzone = document.createElement('div');
+        mainDropzone.classList.add('main-dropzone');
+        mainDropzone.innerText = "Exped. Administrativo";
+
+        // Adiciona todos os servidores ao mainDropzone inicial
+        people.forEach(person => {
+          const draggable = document.createElement('div');
+          draggable.classList.add('draggable', 'person');
+          draggable.draggable = true;
+          draggable.id = `${day.id}-${person.toLowerCase()}-${draggableCounter++}`;
+          draggable.innerText = person;
+          draggable.dataset.day = day.id;
+          draggable.dataset.type = 'person';
+          draggable.addEventListener('dragstart', dragStart);
+          draggable.addEventListener('dragend', dragEnd);
+          
+          // Adiciona o botão de fechar
+          const closeButton = document.createElement('button');
+          closeButton.classList.add('close-btn');
+          closeButton.innerText = 'X';
+          closeButton.onclick = () => removePerson(draggable);
+          draggable.appendChild(closeButton);
+
+          mainDropzone.appendChild(draggable);
+        });
+
+        initialDropzone.appendChild(mainDropzone);
+
+        initialDropzone.addEventListener('dragover', dragOver);
+        initialDropzone.addEventListener('drop', drop);
+
+        lowerContainer.appendChild(initialDropzone);
+
+        dayContainer.appendChild(lowerContainer);
+
+        dayWrapper.appendChild(dayTitle);
+        dayWrapper.appendChild(dayContainer);
+
+        container.appendChild(dayWrapper);
+
+        // Adicionar separador entre os dias
+        container.appendChild(document.createElement('hr'));
+      });
+
+      // Adiciona os event listeners aos dropzones
+      const dropzones = document.querySelectorAll('.dropzone, .vehicle-dropzone');
+      dropzones.forEach(dropzone => {
+        dropzone.addEventListener('dragover', dragOver);
+        dropzone.addEventListener('drop', drop);
+      });
+    }
+
+    function createDropzone(day, activity) {
+      const lowerContainer = document.getElementById(`${day}-lower-container`);
+
+      const dropzone = document.createElement('div');
+      dropzone.classList.add('dropzone');
+      dropzone.id = `${day}-${activity.toLowerCase()}-dropzone`;
+
+      const mainDropzone = document.createElement('div');
+      mainDropzone.classList.add('main-dropzone');
+      mainDropzone.innerText = activity;
+
+      const vehicleDropzone = document.createElement('div');
+      vehicleDropzone.classList.add('vehicle-dropzone');
+      vehicleDropzone.dataset.type = 'vehicle-dropzone';
+      vehicleDropzone.dataset.day = day;
+      vehicleDropzone.innerText = 'Veículo';
+
+      // Adiciona botão de fechar
+      const closeButton = document.createElement('button');
+      closeButton.classList.add('close-btn');
+      closeButton.innerText = 'X';
+      closeButton.onclick = () => removeDropzone(dropzone, day);
+      dropzone.appendChild(closeButton);
+
+      dropzone.appendChild(mainDropzone);
+      dropzone.appendChild(vehicleDropzone);
+
+      dropzone.addEventListener('dragover', dragOver);
+      dropzone.addEventListener('drop', drop);
+
+      lowerContainer.appendChild(dropzone);
+    }
+
+    function removeDropzone(dropzone, day) {
+      const expedienteDropzone = document.getElementById(`${day}-expediente-dropzone`).querySelector('.main-dropzone');
+
+      // Move todos os servidores de volta para o dropzone "Exped. Administrativo"
+      const children = Array.from(dropzone.querySelector('.main-dropzone').children);
+      children.forEach(child => {
+        if (!child.classList.contains('close-btn')) {
+          expedienteDropzone.appendChild(child);
+        }
+      });
+
+      const vehicleDropzone = dropzone.querySelector('.vehicle-dropzone');
+      if (vehicleDropzone) {
+        const vehicle = vehicleDropzone.querySelector('.draggable');
+        if (vehicle) {
+          const originContainer = document.getElementById(`${day}-vehicles-container`);
+          originContainer.appendChild(vehicle);
+        }
+      }
+
+      dropzone.remove();
+    }
+
+    function removePerson(draggable) {
+      draggable.remove();
+    }
+
+    function dragStart(event) {
+      event.dataTransfer.setData('text/plain', event.target.id);
+      setTimeout(() => {
+        event.target.style.display = 'none';
+      }, 0);
+    }
+
+    function dragEnd(event) {
+      event.target.style.display = 'inline-block';
+    }
+
+    function dragOver(event) {
+      event.preventDefault();
+    }
+
+    function drop(event) {
+      event.preventDefault();
+      const id = event.dataTransfer.getData('text/plain');
+      const draggable = document.getElementById(id);
+      const dropzone = event.target.closest('.dropzone, .vehicle-dropzone');
+
+      if (dropzone) {
+        const draggableDay = draggable.dataset.day;
+        const dropzoneDay = dropzone.dataset.day || dropzone.id.split('-')[0];
+
+        // Verifica se o draggable pertence ao mesmo dia da semana que o dropzone
+        if (draggable.dataset.type === 'person' && draggableDay === dropzoneDay) {
+          dropzone.querySelector('.main-dropzone').appendChild(draggable);
+          draggable.style.display = 'inline-block';
+
+          // Adiciona o botão de fechar se estiver na zona Exped. Administrativo
+          if (dropzone.id.includes('expediente-dropzone')) {
+            const closeButton = draggable.querySelector('.close-btn');
+            if (closeButton) {
+              closeButton.style.display = 'block';
+            }
+          } else {
+            const closeButton = draggable.querySelector('.close-btn');
+            if (closeButton) {
+              closeButton.style.display = 'none';
+            }
+          }
+        } else if (draggable.dataset.type === 'vehicle' && draggableDay === dropzoneDay && dropzone.dataset.type === 'vehicle-dropzone') {
+          const currentVehicle = dropzone.querySelector('.draggable.vehicle');
+          if (currentVehicle) {
+            const originContainer = document.getElementById(`${draggableDay}-vehicles-container`);
+            originContainer.appendChild(currentVehicle);
+          }
+          dropzone.innerHTML = '';
+          dropzone.appendChild(draggable);
+          draggable.style.display = 'inline-block';
+        }
+
+        // Ajustar a altura do container pai dinamicamente
+        const parentContainer = dropzone.closest('.container');
+        if (parentContainer) {
+          parentContainer.style.height = 'auto';
+        }
+
+        // Adiciona o texto "Veículo" se estiver vazio
+        if (dropzone.dataset.type === 'vehicle-dropzone' && dropzone.children.length === 0) {
+          dropzone.innerText = 'Veículo';
+        }
+      }
+    }
+
+    function generateTable() {
+      const tablesWrapper = document.getElementById('tables-wrapper');
+    
+      const tableContainer = document.createElement('div');
+      tableContainer.classList.add('table-container');
+    
+      const table = document.createElement('table');
+      table.style.width = '100%'; // Ajusta a largura da tabela
+      table.classList.add('zebra-striping'); // Adiciona a classe para zebra striping
+    
+      // Adiciona a linha com a descrição da ULSAV e Supervisão
+      const descriptionRow = table.insertRow();
+      const descriptionCell = descriptionRow.insertCell();
+      descriptionCell.colSpan = 4; // Define que a célula ocupará todas as colunas da tabela
+      descriptionCell.innerText = `Programação para a ULSAV de ${ulsav}, supervisão de ${supervisao}`;
+      descriptionCell.style.textAlign = 'center';
+      descriptionCell.style.fontWeight = 'bold';
+      descriptionCell.style.backgroundColor = '#4d4d4d';
+      descriptionCell.style.color = 'white';
+    
+      // Adiciona a linha com a semana, mês e ano
+      const weekMonthYearRow = table.insertRow();
+      const weekMonthYearCell = weekMonthYearRow.insertCell();
+      weekMonthYearCell.colSpan = 4; // Define que a célula ocupará todas as colunas da tabela
+      weekMonthYearCell.innerText = `Programação para a ${semanaDoMes}ª semana do mês de ${mesPorExtenso} de ${ano}`;
+      weekMonthYearCell.style.textAlign = 'center';
+      weekMonthYearCell.style.fontWeight = 'bold';
+      weekMonthYearCell.style.backgroundColor = '#4d4d4d';
+      weekMonthYearCell.style.color = 'white';
+    
+      const header = table.insertRow();
+      const dateHeader = document.createElement('th');
+      dateHeader.innerText = 'Data';
+      dateHeader.style.width = '150px'; // Ajusta a largura da coluna
+      header.appendChild(dateHeader);
+    
+      const activityHeader = document.createElement('th');
+      activityHeader.innerText = 'Atividade | Servidor';
+      activityHeader.style.width = '600px'; // Dobra a largura da coluna
+      header.appendChild(activityHeader);
+    
+      const vehicleHeader = document.createElement('th');
+      vehicleHeader.innerText = 'Veículos';
+      header.appendChild(vehicleHeader);
+    
+      const execudataHeader = document.createElement('th');
+      execudataHeader.innerText = 'Executada';
+      execudataHeader.style.width = '200px'; // Aumenta a largura da coluna
+      header.appendChild(execudataHeader);
+    
+      daysOfWeek.forEach(day => {
+        const dayDropzones = document.querySelectorAll(`#${day.id}-lower-container .dropzone`);
+        dayDropzones.forEach((dropzone, index) => {
+          const row = table.insertRow();
+          if (index === 0) {
+            const dateCell = row.insertCell();
+            dateCell.innerText = day.text;
+            dateCell.rowSpan = dayDropzones.length;
+            dateCell.style.verticalAlign = 'middle';
+            if (table.rows.length % 2 === 0) {
+              dateCell.style.backgroundColor = '#f2f2f2';
+            } else {
+              dateCell.style.backgroundColor = '#ffffff';
+            }
+          }
+          const activityCell = row.insertCell();
+          const activityName = dropzone.querySelector('.main-dropzone').innerText.split('\n')[0].trim();
+          const peopleInActivity = Array.from(dropzone.querySelectorAll('.draggable.person'))
+            .map(person => person.innerText.replace('X', '').trim()) // Remove 'X' e espaços
+            .join(', ');
+          activityCell.innerHTML = `<div style="text-align: left;">${activityName}:<br/>${peopleInActivity}</div>`;
+    
+          const vehicleCell = row.insertCell();
+          if (activityName !== "Exped. Administrativo") {
+            const vehicleInActivity = dropzone.querySelector('.vehicle-dropzone .draggable.vehicle');
+            vehicleCell.innerText = vehicleInActivity ? vehicleInActivity.innerText : '';
+          } else {
+            vehicleCell.innerText = '';
+          }
+    
+          const execudataCell = row.insertCell();
+          if (activityName !== "Exped. Administrativo") {
+            execudataCell.innerHTML = 'Sim [ ]  Não [ ]';
+          } else {
+            execudataCell.innerText = '';
+          }
+
+          if (table.rows.length % 2 === 0) {
+            row.style.backgroundColor = '#f2f2f2';
+          } else {
+            row.style.backgroundColor = '#ffffff';
+          }
+        });
+      });
+    
+      const deleteButton = document.createElement('button');
+      deleteButton.classList.add('delete-table-button');
+      deleteButton.innerText = 'Excluir Tabela';
+      deleteButton.onclick = () => {
+        tableContainer.remove();
+        saveTablesToLocalStorage();
+      };
+
+      const printButton = document.createElement('button');
+      printButton.classList.add('print-button');
+      printButton.innerText = 'Imprimir';
+      printButton.onclick = () => {
+        const printContent = tableContainer.innerHTML;
+        const originalContent = document.body.innerHTML;
+        document.body.innerHTML = `<style>
+          table, th, td {
+            border: 1px solid black;
+          }
+          th {
+            background-color: #4d4d4d;
+            color: white;
+          }
+          .zebra-striping tbody tr:nth-child(odd) {
+            background-color: #f2f2f2;
+          }
+        </style>` + printContent;
+        window.print();
+        document.body.innerHTML = originalContent;
+        createDropzones(); // Recreate the dropzones after printing
+        loadTablesFromLocalStorage(); // Reload the tables from localStorage
+      };
+    
+      tableContainer.appendChild(table);
+      tableContainer.appendChild(deleteButton);
+      tableContainer.appendChild(printButton);
+      tableContainer.appendChild(document.createElement('div')).classList.add('separator');
+    
+      tablesWrapper.appendChild(tableContainer);
+      saveTablesToLocalStorage();
+    }
+    
+    function saveTablesToLocalStorage() {
+      const tablesWrapper = document.getElementById('tables-wrapper');
+      localStorage.setItem('tables', tablesWrapper.innerHTML);
+    }
+    
+    function loadTablesFromLocalStorage() {
+      const tablesWrapper = document.getElementById('tables-wrapper');
+      const savedTables = localStorage.getItem('tables');
+      if (savedTables) {
+        tablesWrapper.innerHTML = savedTables;
+    
+        // Re-attach delete button functionality
+        document.querySelectorAll('.delete-table-button').forEach(button => {
+          button.onclick = () => {
+            button.parentElement.remove();
+            saveTablesToLocalStorage();
+          };
+        });
+
+        // Re-attach print button functionality
+        document.querySelectorAll('.print-button').forEach(button => {
+          button.onclick = () => {
+            const printContent = button.parentElement.innerHTML;
+            const originalContent = document.body.innerHTML;
+            document.body.innerHTML = `<style>
+              table, th, td {
+                border: 1px solid black;
+              }
+              th {
+                background-color: #4d4d4d;
+                color: white;
+              }
+              .zebra-striping tbody tr:nth-child(odd) {
+                background-color: #f2f2f2;
+              }
+            </style>` + printContent;
+            window.print();
+            document.body.innerHTML = originalContent;
+            createDropzones(); // Recreate the dropzones after printing
+            loadTablesFromLocalStorage(); // Reload the tables from localStorage
+          };
+        });
+      }
+    }
+
+    // Chamada da função createDropzones() para garantir que os dropzones sejam criados ao carregar a página
+    createDropzones();
+    // Carrega as tabelas salvas do localStorage ao carregar a página
+    loadTablesFromLocalStorage();
+  </script>
+</body>
+</html>

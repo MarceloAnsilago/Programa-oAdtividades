@@ -1,0 +1,7 @@
+streamlit==1.14.0
+pdfkit==1.0.0
+beautifulsoup4==4.11.1
+html2canvas==0.4.1
+jspdf==1.3.2
+locale==2.0.0
+openpyxl==3.0.9  # Se você decidir usar para exportar para Excel
