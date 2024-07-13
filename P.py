@@ -1,7 +1,6 @@
 import streamlit as st
 import streamlit.components.v1 as components
 from datetime import date, timedelta
-import locale
 
 # Configurar a página sem o modo wide
 st.set_page_config(layout="centered")
@@ -32,29 +31,29 @@ st.markdown("""
     }
     .generated-table {
         width: 100%;
-        border-collapse: collapse;
+        border-collapse: collapse.
     }
     .generated-table th, .generated-table td {
-        border: 1px solid black;
-        padding: 8px;
-        text-align: center;  /* Centraliza o texto nas células */
+        border: 1px solid black.
+        padding: 8px.
+        text-align: center.  /* Centraliza o texto nas células */
     }
     .generated-table th {
-        background-color: #f2f2f2;
+        background-color: #f2f2f2.
     }
     .zebra-striping tbody tr:nth-child(even) {
-        background-color: #f9f9f9;
+        background-color: #f9f9f9.
     }
     .zebra-striping tbody tr:nth-child(odd) {
-        background-color: #ffffff;
+        background-color: #ffffff.
     }
     .header-row {
-        background-color: #404040;
-        color: white;
+        background-color: #404040.
+        color: white.
     }
     .header-row-description {
-        background-color: #5a5a5a;
-        color: white;
+        background-color: #5a5a5a.
+        color: white.
     }
     </style>
     """, unsafe_allow_html=True)
@@ -156,21 +155,29 @@ def gerar_programacao(ulsav, supervisao, selected_servidores, selected_atividade
 
     # Definir variáveis semana_do_mes, mes_por_extenso e ano
     semana_do_mes = (primeiro_dia_semana.day - 1) // 7 + 1
-    try:
-        locale.setlocale(locale.LC_TIME, "pt_BR.utf8")
-    except locale.Error:
-        try:
-            locale.setlocale(locale.LC_TIME, "pt_BR.UTF-8")
-        except locale.Error:
-            try:
-                locale.setlocale(locale.LC_TIME, "pt_BR")
-            except locale.Error:
-                locale.setlocale(locale.LC_TIME, "C")
-    mes_por_extenso = primeiro_dia_semana.strftime("%B")
+    
+    mes_por_extenso = translate_month(primeiro_dia_semana.strftime("%B"))
     ano = primeiro_dia_semana.year
 
     html_content = load_html("drag_and_drop.html", selected_servidores, selected_atividades, selected_veiculos, primeiro_dia_semana_formatado, dias_da_semana, ulsav, supervisao, semana_do_mes, mes_por_extenso, ano)
     components.html(html_content, height=10000)
+
+def translate_month(month):
+    months = {
+        "January": "janeiro",
+        "February": "fevereiro",
+        "March": "março",
+        "April": "abril",
+        "May": "maio",
+        "June": "junho",
+        "July": "julho",
+        "August": "agosto",
+        "September": "setembro",
+        "October": "outubro",
+        "November": "novembro",
+        "December": "dezembro"
+    }
+    return months.get(month, month)
 
 # Tabs para navegação
 tab1, tab2 = st.tabs(["Buscar Dados", "Gerar Programação"])
