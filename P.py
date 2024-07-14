@@ -2,8 +2,15 @@ import streamlit as st
 import streamlit.components.v1 as components
 from datetime import date, timedelta
 
-# Configurar a página sem o modo wide
-st.set_page_config(layout="centered")
+# Configurar a página sem o modo wide e definir o ícone
+st.set_page_config(
+    page_title="Gerar Programação de Atividades",
+    page_icon="📅",
+    layout="centered"
+)
+
+# Adicionar título com ícone
+st.title("📅 Gerar Programação de Atividades")
 
 # Adicionando CSS
 st.markdown("""
