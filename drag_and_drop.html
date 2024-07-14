@@ -142,7 +142,7 @@
     .table-container {
       margin-top: 20px;
       display: flex;
-      justify-content: center;
+      justify-content: flex-start;
       align-items: center;
       flex-direction: column;
       width: 100%;
@@ -163,7 +163,7 @@
       background-color: #4d4d4d;
       color: white;
     }
-    .generate-table-button, .delete-table-button, .print-button {
+    .generate-table-button, .delete-table-button, .print-button, .print-all-button {
       width: 120px;
       height: 40px;
       border-radius: 5px;
@@ -174,7 +174,7 @@
       cursor: pointer;
       margin-top: 10px;
     }
-    .generate-table-button:hover, .delete-table-button:hover, .print-button:hover {
+    .generate-table-button:hover, .delete-table-button:hover, .print-button:hover, .print-all-button:hover {
       background-color: #1c86ee;
     }
     .separator {
@@ -188,7 +188,7 @@
     }
 
     @media print {
-      .generate-table-button, .delete-table-button, .print-button {
+      .generate-table-button, .delete-table-button, .print-button, .print-all-button {
         display: none;
       }
     }
@@ -588,6 +588,19 @@
     
       tablesWrapper.appendChild(tableContainer);
       saveTablesToLocalStorage();
+
+      // Remove existing "Imprimir Tudo" button if it exists
+      const existingPrintAllButton = document.querySelector('.print-all-button');
+      if (existingPrintAllButton) {
+        existingPrintAllButton.remove();
+      }
+
+      // Add "Imprimir Tudo" button
+      const printAllButton = document.createElement('button');
+      printAllButton.classList.add('print-all-button');
+      printAllButton.innerText = 'Imprimir Tudo';
+      printAllButton.onclick = printAllTables;
+      tablesWrapper.appendChild(printAllButton);
     }
     
     function saveTablesToLocalStorage() {
@@ -632,7 +645,44 @@
             loadTablesFromLocalStorage(); // Reload the tables from localStorage
           };
         });
+
+        // Remove existing "Imprimir Tudo" button if it exists
+        const existingPrintAllButton = document.querySelector('.print-all-button');
+        if (existingPrintAllButton) {
+          existingPrintAllButton.remove();
+        }
+
+        // Add "Imprimir Tudo" button
+        const printAllButton = document.createElement('button');
+        printAllButton.classList.add('print-all-button');
+        printAllButton.innerText = 'Imprimir Tudo';
+        printAllButton.onclick = printAllTables;
+        tablesWrapper.appendChild(printAllButton);
       }
+    }
+
+    function printAllTables() {
+      const tablesWrapper = document.getElementById('tables-wrapper');
+      const originalContent = document.body.innerHTML;
+      document.body.innerHTML = `<style>
+        table, th, td {
+          border: 1px solid black;
+        }
+        th {
+          background-color: #4d4d4d;
+          color: white;
+        }
+        .zebra-striping tbody tr:nth-child(odd) {
+          background-color: #f2f2f2;
+        }
+        .table-container {
+          page-break-after: always;
+        }
+      </style>` + tablesWrapper.innerHTML;
+      window.print();
+      document.body.innerHTML = originalContent;
+      createDropzones();
+      loadTablesFromLocalStorage();
     }
 
     // Chamada da função createDropzones() para garantir que os dropzones sejam criados ao carregar a página
