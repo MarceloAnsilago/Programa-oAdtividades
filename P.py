@@ -136,12 +136,16 @@ def buscar_dados():
 
     return selected_servidores, selected_atividades, selected_veiculos
 
-def gerar_programacao(ulsav, supervisao, selected_servidores, selected_atividades, selected_veiculos):
+def gerar_programacao(ulsav, supervisao, selected_servidores, selected_atividades, selected_veiculos, incluir_sabado, incluir_domingo):
     st.markdown("### Gerar Programação")
+    
+    st.markdown("---")
+        
 
     st.markdown("### Informe o primeiro dia da semana")
     primeiro_dia_semana = st.date_input("Selecione a data", value=date.today(), key="primeiro_dia_semana")
-
+    st.markdown("---")
+    
     primeiro_dia_semana_formatado = primeiro_dia_semana.strftime("%d/%m/%Y")
 
     dias_semana_dict = {
@@ -149,14 +153,16 @@ def gerar_programacao(ulsav, supervisao, selected_servidores, selected_atividade
         1: "Terça",
         2: "Quarta",
         3: "Quinta",
-        4: "Sexta"
+        4: "Sexta",
+        5: "Sábado" if incluir_sabado else None,
+        6: "Domingo" if incluir_domingo else None
     }
 
     dias_da_semana = []
-    for i in range(5 - primeiro_dia_semana.weekday()):
+    for i in range(7 - primeiro_dia_semana.weekday()):
         dia_atual = primeiro_dia_semana + timedelta(days=i)
-        if dia_atual.weekday() in dias_semana_dict:
-            dia_semana = dias_semana_dict[dia_atual.weekday()]
+        dia_semana = dias_semana_dict.get(dia_atual.weekday())
+        if dia_semana:
             dia_mes = dia_atual.day
             dias_da_semana.append({"id": dia_semana.lower(), "text": f"{dia_semana} - {dia_mes}"})
 
@@ -194,8 +200,21 @@ with tab1:
 
 with tab2:
     if selected_servidores and selected_atividades and selected_veiculos:
-        ulsav = st.text_input("ULSAV", value="SMG")
-        supervisao = st.text_input("Supervisão", value="SFG")
-        gerar_programacao(ulsav, supervisao, selected_servidores, selected_atividades, selected_veiculos)
+        col1, col2 = st.columns(2)
+        with col1:
+            ulsav = st.text_input("ULSAV", value="SMG")
+        with col2:
+            supervisao = st.text_input("Supervisão", value="SFG")
+
+        st.markdown("---")
+        
+        st.markdown("### Incluir final de semana")
+        col1, col2 = st.columns(2)
+        with col1:
+            incluir_sabado = st.checkbox("Sábado", value=False)
+        with col2:
+            incluir_domingo = st.checkbox("Domingo", value=False)
+        
+        gerar_programacao(ulsav, supervisao, selected_servidores, selected_atividades, selected_veiculos, incluir_sabado, incluir_domingo)
     else:
         st.error("Por favor, vá para a aba 'Buscar Dados' e carregue os dados primeiro.")
